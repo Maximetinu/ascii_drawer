@@ -1,7 +1,9 @@
+#![allow(dead_code)]
+
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy)]
-struct Vec2 {
+pub struct Vec2 {
     x: f32,
     y: f32,
 }
@@ -63,20 +65,20 @@ impl AABB {
     }
 }
 
-struct AsciiCanvas {
+pub struct AsciiCanvas {
     buffer: HashMap<(i32, i32), char>,
     bounds: AABB,
 }
 
 impl AsciiCanvas {
-    fn new() -> Self {
+    pub fn new() -> Self {
         AsciiCanvas {
             buffer: HashMap::new(),
             bounds: AABB::default(),
         }
     }
 
-    fn rect(&mut self, center: Vec2, size: Vec2) -> &mut Self {
+    pub fn rect(&mut self, center: Vec2, size: Vec2) -> &mut Self {
         let half_width = (size.x / 2.0).ceil() as i32;
         let half_height = (size.y / 2.0).ceil() as i32;
         let center_x = center.x.round() as i32;
@@ -108,7 +110,7 @@ impl AsciiCanvas {
         self
     }
 
-    fn text(&mut self, position: Vec2, text: &str) -> &mut Self {
+    pub fn text(&mut self, position: Vec2, text: &str) -> &mut Self {
         let start_x = position.x.round() as i32 - (text.len() as i32 / 2);
         let start_y = position.y.round() as i32;
 
@@ -121,7 +123,7 @@ impl AsciiCanvas {
         self
     }
 
-    fn draw(&self) {
+    pub fn draw(&self) {
         let width = (self.bounds.x_max - self.bounds.x_min).ceil() as i32 + 1;
         let height = (self.bounds.y_max - self.bounds.y_min).ceil() as i32 + 1;
         let offset_x = self.bounds.x_min.floor() as i32;
@@ -135,39 +137,52 @@ impl AsciiCanvas {
             canvas[canvas_y][canvas_x] = ch;
         }
 
+        // Disable line wrapping
+        print!("\x1B[?7l");
+
         for row in canvas.iter().rev() {
             println!("{}", row.iter().collect::<String>());
         }
+
+        // Enable line wrapping
+        print!("\x1B[?7h");
     }
 }
 
-struct AsciiDrawer {
+pub struct AsciiDrawer {
     canvas: AsciiCanvas,
     scale: Vec2,
 }
 
 impl AsciiDrawer {
-    fn new(scale: Vec2) -> Self {
+    pub fn new() -> Self {
+        AsciiDrawer {
+            canvas: AsciiCanvas::new(),
+            scale: [1., 1.].into(),
+        }
+    }
+
+    pub fn with_scale(scale: Vec2) -> Self {
         AsciiDrawer {
             canvas: AsciiCanvas::new(),
             scale,
         }
     }
 
-    fn rect(&mut self, center: Vec2, size: Vec2) -> &mut Self {
+    pub fn rect(&mut self, center: Vec2, size: Vec2) -> &mut Self {
         let scaled_center: Vec2 = center * self.scale;
         let scaled_size: Vec2 = size * self.scale;
         self.canvas.rect(scaled_center, scaled_size);
         self
     }
 
-    fn text(&mut self, position: Vec2, text: &str) -> &mut Self {
+    pub fn text(&mut self, position: Vec2, text: &str) -> &mut Self {
         let scaled_position: Vec2 = position * self.scale;
         self.canvas.text(scaled_position, text);
         self
     }
 
-    fn rect_with_labels(
+    pub fn rect_with_labels(
         &mut self,
         center: Vec2,
         size: Vec2,
@@ -210,13 +225,13 @@ impl AsciiDrawer {
         self
     }
 
-    fn draw(&self) {
+    pub fn draw(&self) {
         self.canvas.draw();
     }
 }
 
 fn main() {
-    AsciiDrawer::new([4.5, 2.0].into())
+    AsciiDrawer::with_scale([4.5, 2.0].into())
         .rect([-1.0, 0.0].into(), [1.0, 1.0].into())
         .rect_with_labels([0.0, 0.0].into(), [10.0, 5.0].into(), true, false, false)
         .rect_with_labels([4.0, 0.0].into(), [6.0, 2.0].into(), false, true, true)
