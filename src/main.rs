@@ -14,13 +14,13 @@ impl Vec2 {
 
 use std::ops::Mul;
 
-impl Mul<f32> for Vec2 {
+impl Mul<Vec2> for Vec2 {
     type Output = Vec2;
 
-    fn mul(self, rhs: f32) -> Vec2 {
+    fn mul(self, rhs: Vec2) -> Vec2 {
         Vec2 {
-            x: self.x * rhs,
-            y: self.y * rhs,
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
         }
     }
 }
@@ -138,11 +138,11 @@ impl AsciiCanvas {
 
 struct AsciiDrawer {
     canvas: AsciiCanvas,
-    scale: f32,
+    scale: Vec2,
 }
 
 impl AsciiDrawer {
-    fn new(scale: f32) -> Self {
+    fn new(scale: Vec2) -> Self {
         AsciiDrawer {
             canvas: AsciiCanvas::new(),
             scale,
@@ -207,7 +207,7 @@ impl AsciiDrawer {
 }
 
 fn main() {
-    let mut drawer = AsciiDrawer::new(5.0);
+    let mut drawer = AsciiDrawer::new(Vec2::new(5.0, 2.25));
 
     drawer.rect(Vec2::new(-1.0, 0.0), Vec2::new(1.0, 1.0));
     drawer.rect_with_labels(
