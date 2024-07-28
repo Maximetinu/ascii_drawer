@@ -76,7 +76,7 @@ impl AsciiCanvas {
         }
     }
 
-    fn rect(&mut self, center: Vec2, size: Vec2) {
+    fn rect(&mut self, center: Vec2, size: Vec2) -> &mut Self {
         let half_width = (size.x / 2.0).ceil() as i32;
         let half_height = (size.y / 2.0).ceil() as i32;
         let center_x = center.x.round() as i32;
@@ -104,9 +104,11 @@ impl AsciiCanvas {
             self.bounds
                 .include_point([px_right as f32, py as f32].into());
         }
+
+        self
     }
 
-    fn text(&mut self, position: Vec2, text: &str) {
+    fn text(&mut self, position: Vec2, text: &str) -> &mut Self {
         let start_x = position.x.round() as i32 - (text.len() as i32 / 2);
         let start_y = position.y.round() as i32;
 
@@ -115,6 +117,8 @@ impl AsciiCanvas {
             self.buffer.insert((x, start_y), ch);
             self.bounds.include_point([x as f32, start_y as f32].into());
         }
+
+        self
     }
 
     fn draw(&self) {
@@ -150,15 +154,17 @@ impl AsciiDrawer {
         }
     }
 
-    fn rect(&mut self, center: Vec2, size: Vec2) {
+    fn rect(&mut self, center: Vec2, size: Vec2) -> &mut Self {
         let scaled_center: Vec2 = center * self.scale;
         let scaled_size: Vec2 = size * self.scale;
         self.canvas.rect(scaled_center, scaled_size);
+        self
     }
 
-    fn text(&mut self, position: Vec2, text: &str) {
+    fn text(&mut self, position: Vec2, text: &str) -> &mut Self {
         let scaled_position: Vec2 = position * self.scale;
         self.canvas.text(scaled_position, text);
+        self
     }
 
     fn rect_with_labels(
@@ -168,7 +174,7 @@ impl AsciiDrawer {
         corners_coords: bool,
         center_coords: bool,
         edge_lengths: bool,
-    ) {
+    ) -> &mut Self {
         self.rect(center, size);
 
         let half_width = size.x / 2.0;
@@ -200,6 +206,8 @@ impl AsciiDrawer {
             self.text(left_center, &edge_length_y.to_string());
             self.text(bottom_center, &edge_length_x.to_string());
         }
+
+        self
     }
 
     fn draw(&self) {
@@ -208,11 +216,9 @@ impl AsciiDrawer {
 }
 
 fn main() {
-    let mut drawer = AsciiDrawer::new([5.0, 2.25].into());
-
-    drawer.rect([-1.0, 0.0].into(), [1.0, 1.0].into());
-    drawer.rect_with_labels([0.0, 0.0].into(), [10.0, 5.0].into(), true, false, false);
-    drawer.rect_with_labels([4.0, 0.0].into(), [6.0, 2.0].into(), false, true, true);
-
-    drawer.draw();
+    AsciiDrawer::new([5.0, 2.25].into())
+        .rect([-1.0, 0.0].into(), [1.0, 1.0].into())
+        .rect_with_labels([0.0, 0.0].into(), [10.0, 5.0].into(), true, false, false)
+        .rect_with_labels([4.0, 0.0].into(), [6.0, 2.0].into(), false, true, true)
+        .draw();
 }
