@@ -6,9 +6,12 @@ struct Vec2 {
     y: f32,
 }
 
-impl Vec2 {
-    fn new(x: f32, y: f32) -> Self {
-        Vec2 { x, y }
+impl From<[f32; 2]> for Vec2 {
+    fn from(arr: [f32; 2]) -> Self {
+        Vec2 {
+            x: arr[0],
+            y: arr[1],
+        }
     }
 }
 
@@ -85,10 +88,9 @@ impl AsciiCanvas {
             let py_bottom = center_y + half_height;
             self.buffer.insert((px, py_top), '-');
             self.buffer.insert((px, py_bottom), '-');
+            self.bounds.include_point([px as f32, py_top as f32].into());
             self.bounds
-                .include_point(Vec2::new(px as f32, py_top as f32));
-            self.bounds
-                .include_point(Vec2::new(px as f32, py_bottom as f32));
+                .include_point([px as f32, py_bottom as f32].into());
         }
 
         for y in -half_height..=half_height {
@@ -98,9 +100,9 @@ impl AsciiCanvas {
             self.buffer.insert((px_left, py), '|');
             self.buffer.insert((px_right, py), '|');
             self.bounds
-                .include_point(Vec2::new(px_left as f32, py as f32));
+                .include_point([px_left as f32, py as f32].into());
             self.bounds
-                .include_point(Vec2::new(px_right as f32, py as f32));
+                .include_point([px_right as f32, py as f32].into());
         }
     }
 
@@ -111,8 +113,7 @@ impl AsciiCanvas {
         for (i, ch) in text.chars().enumerate() {
             let x = start_x + i as i32;
             self.buffer.insert((x, start_y), ch);
-            self.bounds
-                .include_point(Vec2::new(x as f32, start_y as f32));
+            self.bounds.include_point([x as f32, start_y as f32].into());
         }
     }
 
@@ -150,13 +151,13 @@ impl AsciiDrawer {
     }
 
     fn rect(&mut self, center: Vec2, size: Vec2) {
-        let scaled_center = center * self.scale;
-        let scaled_size = size * self.scale;
+        let scaled_center: Vec2 = center * self.scale;
+        let scaled_size: Vec2 = size * self.scale;
         self.canvas.rect(scaled_center, scaled_size);
     }
 
     fn text(&mut self, position: Vec2, text: &str) {
-        let scaled_position = position * self.scale;
+        let scaled_position: Vec2 = position * self.scale;
         self.canvas.text(scaled_position, text);
     }
 
@@ -174,10 +175,10 @@ impl AsciiDrawer {
         let half_height = size.y / 2.0;
 
         let corners = [
-            Vec2::new(center.x - half_width, center.y - half_height),
-            Vec2::new(center.x + half_width, center.y - half_height),
-            Vec2::new(center.x - half_width, center.y + half_height),
-            Vec2::new(center.x + half_width, center.y + half_height),
+            [center.x - half_width, center.y - half_height].into(),
+            [center.x + half_width, center.y - half_height].into(),
+            [center.x - half_width, center.y + half_height].into(),
+            [center.x + half_width, center.y + half_height].into(),
         ];
 
         if corners_coords {
@@ -191,8 +192,8 @@ impl AsciiDrawer {
         }
 
         if edge_lengths {
-            let left_center = Vec2::new(center.x - half_width, center.y);
-            let bottom_center = Vec2::new(center.x, center.y - half_height);
+            let left_center: Vec2 = [center.x - half_width, center.y].into();
+            let bottom_center: Vec2 = [center.x, center.y - half_height].into();
             let edge_length_x = size.x.round() as i32;
             let edge_length_y = size.y.round() as i32;
 
@@ -207,17 +208,11 @@ impl AsciiDrawer {
 }
 
 fn main() {
-    let mut drawer = AsciiDrawer::new(Vec2::new(5.0, 2.25));
+    let mut drawer = AsciiDrawer::new([5.0, 2.25].into());
 
-    drawer.rect(Vec2::new(-1.0, 0.0), Vec2::new(1.0, 1.0));
-    drawer.rect_with_labels(
-        Vec2::new(0.0, 0.0),
-        Vec2::new(10.0, 5.0),
-        true,
-        false,
-        false,
-    );
-    drawer.rect_with_labels(Vec2::new(4.0, 0.0), Vec2::new(6.0, 2.0), false, true, true);
+    drawer.rect([-1.0, 0.0].into(), [1.0, 1.0].into());
+    drawer.rect_with_labels([0.0, 0.0].into(), [10.0, 5.0].into(), true, false, false);
+    drawer.rect_with_labels([4.0, 0.0].into(), [6.0, 2.0].into(), false, true, true);
 
     drawer.draw();
 }
