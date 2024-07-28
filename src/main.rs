@@ -216,9 +216,10 @@ impl AsciiDrawer {
 }
 
 fn main() {
-    AsciiDrawer::new([5.0, 2.25].into())
+    AsciiDrawer::new([4.5, 2.0].into())
         .rect([-1.0, 0.0].into(), [1.0, 1.0].into())
         .rect_with_labels([0.0, 0.0].into(), [10.0, 5.0].into(), true, false, false)
         .rect_with_labels([4.0, 0.0].into(), [6.0, 2.0].into(), false, true, true)
+        .text([0., 2.5].into(), "Hello World!")
         .draw();
 }
